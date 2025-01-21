@@ -1,33 +1,49 @@
-import React, { useState } from 'react'
-import Navbar from '../../components/Navbar'
-import { Link } from 'react-router-dom'
-import PasswordInput from '../../components/input/PasswordInput'
-import { validationEmail } from '../../utils/helper'
+import { useState } from "react";
+import Navbar from "../../components/Navbar";
+import { Link, useNavigate } from "react-router-dom";
+import PasswordInput from "../../components/input/PasswordInput";
+import { validationEmail } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosinstance";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [ error, setError] = useState(null);
-
-
-    const handleLogin = async (e) =>{
-        e.preventDefault();
-        if(!validationEmail(email)){
-            setError("Please enter a valid email address.");
-            return;
-        }
-        if (!password) {
-          setError("Please enter a valid password.");
-          return;
-        }
-    setError("");
-
-    // Login API Call
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!validationEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
     }
+    if (!password) {
+      setError("Please enter a valid password.");
+      return;
+    }
+    setError("");
+    // Login API Call
+    try {
+      const response = await axiosInstance.post("/login", {
+        email: email,
+        password: password,
+      });
 
-
+      //Handle Successfull login response
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem("token", response.data.accessToken);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      // handle login error
+      if(error.response && error.response.data && error.response.data.message)
+      {
+        setError(error.data.response.data.message);
+      } else {
+        setError("An unexpected error occurred!.Please try again.")
+      }
+    }
+  };
 
   return (
     <>
@@ -69,6 +85,6 @@ const Login = () => {
       </div>
     </>
   );
-}
+};
 
-export default Login
+export default Login;
