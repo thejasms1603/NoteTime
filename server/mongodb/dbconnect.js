@@ -1,11 +1,9 @@
 require("dotenv").config();
-const config = require("../config.json");
-
 const mongoose = require("mongoose");
 
 const connectToDatabase = async () => {
   try {
-    const dbURL = config.connectionString;
+    const dbURL = process.env.connectionString;
     if (!dbURL) throw new Error("Database is not defined in ENV File");
     await mongoose.connect(dbURL);
     console.log("Successfully connected to the database");
